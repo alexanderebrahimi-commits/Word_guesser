@@ -1,119 +1,92 @@
-
-
 import random
-import sys
 
-
-WORDS_9 = [
-    "pineapple",  # 9
-    "algorithm",  # 9
-    "developer",  # 9
-    "beautiful",  # 9
-    "formation",  # 9
-    "framework",  # 9
-    "togethern",  # 9 
+WORD_LIST = [
+    "algorithm",
+    "pineapple",
+    "framework",
+    "developer",
+    "formation",
+    "beautiful",
 ]
 
-MAX_MISSES = 9  
+MAX_WRONG_GUESSES = 9
 
-def choose_word(word_list):
+def choose_random_word(word_list):
     return random.choice(word_list).lower()
 
-def display_state(word, guessed_letters):
-    
-    parts = []
-    for c in word:
-        if c in guessed_letters:
-            
-            parts.append("****" + c + "****")
+def format_word_state(secret_word, guessed_letters):
+    formatted = []
+    for letter in secret_word:
+        if letter in guessed_letters:
+            formatted.append(f"****{letter}****")
         else:
-            parts.append("_")
-    
-    return "".join(parts)
+            formatted.append("_")
+    return "".join(formatted)
 
-def get_guess(already_guessed):
+def get_user_guess(previous_guesses):
     while True:
         guess = input("Ange en gissning (en bokstav eller hela ordet): ").strip().lower()
         if not guess:
-            print("Skriv en bokstav eller ett ord.")
+            print("Du måste skriva något.")
             continue
-        if len(guess) == 1:
-            if not guess.isalpha():
-                print("Använd endast bokstäver.")
-                continue
-            if guess in already_guessed:
-                print("Du har redan gissat den bokstaven.")
-                continue
-            return guess
-        else:
-            
-            if not guess.isalpha():
-                print("Använd endast bokstäver när du gissar hela ord.")
-                continue
-            return guess
+        if not guess.isalpha():
+            print("Endast bokstäver är tillåtna.")
+            continue
+        if guess in previous_guesses:
+            print("Du har redan gissat detta.")
+            continue
+        return guess
 
 def play_round():
-    word = choose_word(WORDS_9)
+    secret_word = choose_random_word(WORD_LIST)
     guessed_letters = set()
     wrong_guesses = []
-    misses_left = MAX_MISSES
+    guesses_left = MAX_WRONG_GUESSES
 
-    
-    print(f'\nDu ska gissa ett ord, bokstav för bokstav, på 9 bokstäver ange en gissing -> _ du har nu {misses_left} st felgissningar kvar. Felgissningar : ')
+    print(f"\nDu ska gissa ett ord på 9 bokstäver.")
+    print(f"Du har {guesses_left} felgissningar.")
+    print("Felgissningar: (inga ännu)")
 
     while True:
-        state = display_state(word, guessed_letters)
-        print("\nOrd: ", state)
-        print(f"Du har nu {misses_left} st felgissningar kvar.")
-        print("Felgissningar :", " ".join(wrong_guesses) if wrong_guesses else "(inga)")
+        print("\nOrdet:", format_word_state(secret_word, guessed_letters))
+        print(f"Kvarvarande felgissningar: {guesses_left}")
+        print("Felgissningar:", " ".join(wrong_guesses) if wrong_guesses else "(inga)")
 
-        guess = get_guess(guessed_letters.union(set(wrong_guesses)))
+        guess = get_user_guess(guessed_letters.union(wrong_guesses))
 
-        if len(guess) > 1:
-            
-            if guess == word:
-                
-                guessed_letters.update(set(word))
-                print("\nGrattis! Du gissade rätt ordet:", word)
-                return True
-            else:
-                misses_left -= 1
-                wrong_guesses.append(guess)
-                print("Fel gissat hela ordet.")
-        else:
-           
-            if guess in word:
+        if len(guess) == 1:
+            if guess in secret_word:
                 guessed_letters.add(guess)
-                print(f"Rätt bokstav: '{guess}' är i ordet.")
-               
-                if all(c in guessed_letters for c in set(word)):
-                    print("\nGrattis — du klarade det! Ordet var:", word)
+                print(f"Rätt! Bokstaven '{guess}' finns i ordet.")
+                if all(letter in guessed_letters for letter in set(secret_word)):
+                    print("\nDu vann! Ordet var:", secret_word)
                     return True
             else:
-                misses_left -= 1
                 wrong_guesses.append(guess)
-                print(f"Fel bokstav: '{guess}'")
+                guesses_left -= 1
+                print("Fel bokstav.")
+        else:
+            if guess == secret_word:
+                print("\nDu vann! Ordet var:", secret_word)
+                return True
+            else:
+                wrong_guesses.append(guess)
+                guesses_left -= 1
+                print("Fel ord.")
 
-        if misses_left <= 0:
-            print("\nDu har inga felgissningar kvar. Game over!")
-            print("Rätt ord var:", word)
+        if guesses_left == 0:
+            print("\nDu förlorade! Ordet var:", secret_word)
             return False
 
 def main():
-    print("=== Ordgissningsspel (9 bokstäver) ===")
+    print("=== Word Guesser – 9 bokstäver ===")
     while True:
         play_round()
-        again = input("\nSpela igen? (j/n): ").strip().lower()
+        again = input("\nVill du spela igen? (j/n): ").strip().lower()
         if again != "j":
-            print("Tack för spelet! Hej då.")
+            print("Hejdå!")
             break
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\nAvslutar. Hej!")
-        sys.exit(0)
-
-
+    main()
 
