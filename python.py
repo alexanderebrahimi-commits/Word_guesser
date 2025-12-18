@@ -1,10 +1,10 @@
 import random
 
 WORD_LIST = [
-    "algorithm",
-    "pineapple",
-    "framework",
-    "developer",
+    "tillstånd",
+    "maskering",
+    "innehålls",
+    "fördelen",
     "formation",
     "beautiful",
 ]
